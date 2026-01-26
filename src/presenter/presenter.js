@@ -8,25 +8,30 @@ import SortingView from '../view/sorting.js';
 import TripInfoView from '../view/trip-info.js';
 
 export default class Presenter {
-  constructor({container, filtersContainer, tripMainContainer}) {
+  constructor({container, filtersContainer, tripMainContainer, model}) {
     this.container = container;
     this.filtersContainer = filtersContainer;
     this.tripMainContainer = tripMainContainer;
+    this.model = model;
   }
 
   init(){
-    const createFormView = new CreateFormView();
-    const editFormView = new EditFormView();
     const listRoutePointView = new ListRoutePointView();
 
     render(new TripInfoView(), this.tripMainContainer, 'afterbegin');
     render(new FilterView(), this.filtersContainer);
     render(new SortingView(), this.container);
-    render(editFormView, listRoutePointView.getElement());
-    render(createFormView, listRoutePointView.getElement());
-    for(let i = 0; i < 3; i++){
-      render(new RoutePointView(), listRoutePointView.getElement());
+
+    const points = this.model.getPoints();
+
+    render(new EditFormView(points[0], this.model), listRoutePointView.getElement());
+
+    render(new CreateFormView(),listRoutePointView.getElement());
+
+    for(let i = 1; i < points.length; i++){
+      render(new RoutePointView(points[i], this.model), listRoutePointView.getElement());
     }
+
     render(listRoutePointView, this.container);
   }
 }
