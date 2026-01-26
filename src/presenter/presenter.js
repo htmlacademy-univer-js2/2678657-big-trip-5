@@ -6,14 +6,13 @@ import ListRoutePointView from '../view/list-route-point.js';
 import FilterView from '../view/filters.js';
 import SortingView from '../view/sorting.js';
 import TripInfoView from '../view/trip-info.js';
-import AppModel from '../model/app-model.js';
 
 export default class Presenter {
-  constructor({container, filtersContainer, tripMainContainer}) {
+  constructor({container, filtersContainer, tripMainContainer, model}) {
     this.container = container;
     this.filtersContainer = filtersContainer;
     this.tripMainContainer = tripMainContainer;
-    this.model = new AppModel();
+    this.model = model;
   }
 
   init(){
@@ -33,13 +32,9 @@ export default class Presenter {
 
     render(new CreateFormView(),listRoutePointView.getElement());
 
-    points.forEach((point) => {
-      const destination = this.model.getDestinationById(point.destinationId);
-      const allOffersForType = this.model.getOffersByType(point.type);
-      const selectedOffers = allOffersForType.filter((offer) => point.offerIds.includes(offer.id));
-
-      render(new RoutePointView(point, destination, selectedOffers),listRoutePointView.getElement());
-    });
+    for(let i = 1; i < points.length; i++){
+      render(new RoutePointView(points[i], this.model), listRoutePointView.getElement());
+    }
 
 
     render(listRoutePointView, this.container);

@@ -1,6 +1,10 @@
 import {createElement} from '../render.js';
 
-function createRoutePointTemplate(point, destination, offers) {
+function createRoutePointTemplate(point, model) {
+  const destination = model.getDestinationById(point.destinationId);
+  const allOffersForType = model.getOffersByType(point.type);
+  const offers = allOffersForType.filter((offer) => point.offerIds.includes(offer.id));
+
   const { type, startDate, endDate, price, isFavorite } = point;
   const { name } = destination;
 
@@ -50,14 +54,13 @@ function createRoutePointTemplate(point, destination, offers) {
 }
 
 export default class RoutePointView {
-  constructor(point, destination, offers) {
+  constructor(point, model) {
     this.point = point;
-    this.destination = destination;
-    this.offers = offers;
+    this.model = model;
   }
 
   getTemplate() {
-    return createRoutePointTemplate(this.point, this.destination, this.offers);
+    return createRoutePointTemplate(this.point, this.model);
   }
 
   getElement() {
