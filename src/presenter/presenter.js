@@ -24,18 +24,13 @@ export default class Presenter {
 
     const points = this.model.getPoints();
 
-    const editPoint = points[0];
-    const editPointDestination = this.model.getDestinationById(editPoint.destinationId);
-    const editPointAllOffersForType = this.model.getOffersByType(editPoint.type);
-
-    render(new EditFormView(editPoint, editPointDestination, editPointAllOffersForType),listRoutePointView.getElement());
+    render(new EditFormView(points[0], this.model), listRoutePointView.getElement());
 
     render(new CreateFormView(),listRoutePointView.getElement());
 
     for(let i = 1; i < points.length; i++){
       render(new RoutePointView(points[i], this.model), listRoutePointView.getElement());
     }
-
 
     render(listRoutePointView, this.container);
   }

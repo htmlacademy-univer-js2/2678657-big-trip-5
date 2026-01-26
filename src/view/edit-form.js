@@ -1,7 +1,10 @@
 import {createElement} from '../render.js';
 import {formatDateTime} from '../mocks/point-mock.js';
 
-function createEditFormTemplate(point, destination, allOffersForType = []) {
+function createEditFormTemplate(point, model) {
+  const destination = model.getDestinationById(point.destinationId);
+  const allOffersForType = model.getOffersByType(point.type);
+
   const { type, startDate, endDate, price, offers: selectedOfferIds = [] } = point;
   const { name, description } = destination;
 
@@ -135,14 +138,13 @@ function createEditFormTemplate(point, destination, allOffersForType = []) {
 }
 
 export default class EditFormView {
-  constructor(point, destination, allOffers = []) {
+  constructor(point, model) {
     this.point = point;
-    this.destination = destination;
-    this.allOffers = allOffers;
+    this.model = model;
   }
 
   getTemplate() {
-    return createEditFormTemplate(this.point, this.destination, this.allOffers);
+    return createEditFormTemplate(this.point, this.model);
   }
 
   getElement() {
