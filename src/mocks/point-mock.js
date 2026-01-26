@@ -50,4 +50,19 @@ function formatDateTime(date) {
   return `${day}/${month}/${year} ${hours}:${minutes}`;
 }
 
-export {generatePoints, formatDateTime};
+function calculateDuration(start, end) {
+  const diffMs = end - start;
+  const diffMinutes = Math.floor(diffMs / (1000 * 60));
+  const diffHours = Math.floor(diffMinutes / 60);
+  const diffDays = Math.floor(diffHours / 24);
+
+  if (diffDays > 0) {
+    return `${diffDays}D ${diffHours % 24}H ${diffMinutes % 60}M`;
+  } else if (diffHours > 0) {
+    return `${diffHours}H ${diffMinutes % 60}M`;
+  } else {
+    return `${diffMinutes}M`;
+  }
+}
+
+export {generatePoints, formatDateTime, calculateDuration};

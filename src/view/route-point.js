@@ -1,4 +1,5 @@
 import {createElement} from '../render.js';
+import {calculateDuration} from '../mocks/point-mock.js';
 
 function createRoutePointTemplate(point, model) {
   const destination = model.getDestinationById(point.destinationId);
@@ -11,6 +12,7 @@ function createRoutePointTemplate(point, model) {
   const dateFormat = startDate.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
   const startTime = startDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
   const endTime = endDate.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+  const duration = calculateDuration(startDate, endDate);
 
   return (`<li class="trip-events__item">
               <div class="event">
@@ -25,7 +27,7 @@ function createRoutePointTemplate(point, model) {
                     &mdash;
                     <time class="event__end-time" datetime="${endDate.toISOString()}">${endTime}</time>
                   </p>
-                  <p class="event__duration">30M</p>
+                  <p class="event__duration">${duration}</p>
                 </div>
                 <p class="event__price">
                   &euro;&nbsp;<span class="event__price-value">${price}</span>
