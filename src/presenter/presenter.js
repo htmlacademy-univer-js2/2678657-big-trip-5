@@ -1,5 +1,4 @@
-import { render } from '../render.js';
-import CreateFormView from '../view/create-form.js';
+import { render, replace } from '../framework/render.js';
 import EditFormView from '../view/edit-form.js';
 import RoutePointView from '../view/route-point.js';
 import ListRoutePointView from '../view/list-route-point.js';
@@ -8,6 +7,8 @@ import SortingView from '../view/sorting.js';
 import TripInfoView from '../view/trip-info.js';
 
 export default class Presenter {
+  #listRoutePointView = null;
+
   constructor({container, filtersContainer, tripMainContainer, model}) {
     this.container = container;
     this.filtersContainer = filtersContainer;
@@ -15,8 +16,8 @@ export default class Presenter {
     this.model = model;
   }
 
-  init(){
-    const listRoutePointView = new ListRoutePointView();
+  init() {
+    this.#listRoutePointView = new ListRoutePointView();
 
     render(new TripInfoView(), this.tripMainContainer, 'afterbegin');
     render(new FilterView(), this.filtersContainer);
@@ -24,14 +25,42 @@ export default class Presenter {
 
     const points = this.model.getPoints();
 
-    render(new EditFormView(points[0], this.model), listRoutePointView.getElement());
+    points.forEach((point) => {
+      this.#renderPoint(point);
+    });
 
-    render(new CreateFormView(),listRoutePointView.getElement());
+    render(this.#listRoutePointView, this.container);
+  }
 
-    for(let i = 1; i < points.length; i++){
-      render(new RoutePointView(points[i], this.model), listRoutePointView.getElement());
+  #renderPoint(pointData) {
+
+    const pointComponent = new RoutePointView(pointData, this.model, replacePointToEdit);
+    const editFormComponent = new EditFormView(pointData, this.model, replaceEditToPoint, onFormSubmit);
+
+    const escKeyDownHandler = (evt) => {
+      if (evt.key === 'Escape' || evt.key === 'Esc') {
+        evt.preventDefault();
+        replaceEditToPoint();
+        document.removeEventListener('keydown', escKeyDownHandler);
+      }
+    };
+
+    function replacePointToEdit() {
+      replace(editFormComponent, pointComponent);
+      document.addEventListener('keydown', escKeyDownHandler);
     }
 
-    render(listRoutePointView, this.container);
+    function replaceEditToPoint() {
+      replace(pointComponent, editFormComponent);
+      document.removeEventListener('keydown', escKeyDownHandler);
+    }
+
+    function onFormSubmit(evt) {
+      evt.preventDefault();
+      replaceEditToPoint();
+      document.removeEventListener('keydown', escKeyDownHandler);
+    }
+
+    render(pointComponent, this.#listRoutePointView.element);
   }
 }

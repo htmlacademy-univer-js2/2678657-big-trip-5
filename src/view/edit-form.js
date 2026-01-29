@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
 import {formatDateTime} from '../mocks/point-mock.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createEditFormTemplate(point, model) {
   const destination = model.getDestinationById(point.destinationId);
@@ -137,25 +137,27 @@ function createEditFormTemplate(point, model) {
               </form>`);
 }
 
-export default class EditFormView {
-  constructor(point, model) {
+export default class EditFormView extends AbstractView {
+  constructor(point, model, onCloseClick, onFormSubmit) {
+    super();
     this.point = point;
     this.model = model;
+    this._handleCloseClick = onCloseClick;
+    this._handleFormSubmit = onFormSubmit;
+
+    const rollupButton = this.element.querySelector('.event__rollup-btn');
+
+    rollupButton.addEventListener('click', () => {
+      this._handleCloseClick();
+    });
+
+    this.element.addEventListener('submit', (evt) => {
+      this._handleFormSubmit(evt);
+    });
   }
 
-  getTemplate() {
+  get template() {
     return createEditFormTemplate(this.point, this.model);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
 }

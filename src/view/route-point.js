@@ -1,5 +1,5 @@
-import {createElement} from '../render.js';
 import {calculateDuration} from '../mocks/point-mock.js';
+import AbstractView from '../framework/view/abstract-view.js';
 
 function createRoutePointTemplate(point, model) {
   const destination = model.getDestinationById(point.destinationId);
@@ -55,25 +55,25 @@ function createRoutePointTemplate(point, model) {
             </li>`);
 }
 
-export default class RoutePointView {
-  constructor(point, model) {
-    this.point = point;
-    this.model = model;
+export default class RoutePointView extends AbstractView {
+  #point = null;
+  #model = null;
+  #handleRollupClick = null;
+
+  constructor(point, model, onRollupButtonClick) {
+    super();
+    this.#point = point;
+    this.#model = model;
+    this.#handleRollupClick = onRollupButtonClick;
+
+    const rollupButton = this.element.querySelector('.event__rollup-btn');
+    rollupButton.addEventListener('click', () => {
+      this.#handleRollupClick();
+    });
   }
 
-  getTemplate() {
-    return createRoutePointTemplate(this.point, this.model);
+  get template() {
+    return createRoutePointTemplate(this.#point, this.#model);
   }
 
-  getElement() {
-    if (!this.element) {
-      this.element = createElement(this.getTemplate());
-    }
-
-    return this.element;
-  }
-
-  removeElement() {
-    this.element = null;
-  }
 }
