@@ -8,34 +8,38 @@ import TripInfoView from '../view/trip-info.js';
 
 export default class Presenter {
   #listRoutePointView = null;
+  #container = null;
+  #filtersContainer = null;
+  #tripMainContainer = null;
+  #model = null;
 
   constructor({container, filtersContainer, tripMainContainer, model}) {
-    this.container = container;
-    this.filtersContainer = filtersContainer;
-    this.tripMainContainer = tripMainContainer;
-    this.model = model;
+    this.#container = container;
+    this.#filtersContainer = filtersContainer;
+    this.#tripMainContainer = tripMainContainer;
+    this.#model = model;
   }
 
   init() {
     this.#listRoutePointView = new ListRoutePointView();
 
-    render(new TripInfoView(), this.tripMainContainer, 'afterbegin');
-    render(new FilterView(), this.filtersContainer);
-    render(new SortingView(), this.container);
+    render(new TripInfoView(), this.#tripMainContainer, 'afterbegin');
+    render(new FilterView(), this.#filtersContainer);
+    render(new SortingView(), this.#container);
 
-    const points = this.model.getPoints();
+    const points = this.#model.getPoints();
 
     points.forEach((point) => {
       this.#renderPoint(point);
     });
 
-    render(this.#listRoutePointView, this.container);
+    render(this.#listRoutePointView, this.#container);
   }
 
   #renderPoint(pointData) {
 
-    const pointComponent = new RoutePointView(pointData, this.model, replacePointToEdit);
-    const editFormComponent = new EditFormView(pointData, this.model, replaceEditToPoint, onFormSubmit);
+    const pointComponent = new RoutePointView(pointData, this.#model, replacePointToEdit);
+    const editFormComponent = new EditFormView(pointData, this.#model, replaceEditToPoint, onFormSubmit);
 
     const escKeyDownHandler = (evt) => {
       if (evt.key === 'Escape' || evt.key === 'Esc') {

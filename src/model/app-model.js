@@ -2,21 +2,34 @@ import {generatePoints} from '../mocks/point-mock.js';
 import { DESTINATIONS, OFFERS } from '../const.js';
 
 export default class AppModel {
+  #points = [];
+  #destinations = [];
+  #offers = [];
+
   constructor() {
-    this.points = generatePoints(5);
-    this.destinations = DESTINATIONS;
-    this.offers = OFFERS;
+    this.#points = generatePoints(5);
+    this.#destinations = DESTINATIONS;
+    this.#offers = OFFERS;
   }
 
-  getPoints() {
-    return this.points;
+  get Points() {
+    return [...this.#points];
+  }
+
+  get Destinations() {
+    return [...this.#destinations];
+  }
+
+  get Offers() {
+    return [...this.#offers];
   }
 
   getDestinationById(id) {
-    return this.destinations.find((dest) => dest.id === id);
+    const destination = this.#destinations.find((dest) => dest.id === id);
+    return destination ? {...destination} : null;
   }
 
   getOffersByType(type) {
-    return this.offers.filter((offer) => offer.type === type);
+    return this.#offers.filter((offer) => offer.type === type).map((offer) => ({...offer}));
   }
 }

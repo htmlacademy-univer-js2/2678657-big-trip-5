@@ -138,26 +138,31 @@ function createEditFormTemplate(point, model) {
 }
 
 export default class EditFormView extends AbstractView {
+  #point = null;
+  #model = null;
+  #handleCloseClick = null;
+  #handleFormSubmit = null;
+
   constructor(point, model, onCloseClick, onFormSubmit) {
     super();
-    this.point = point;
-    this.model = model;
-    this._handleCloseClick = onCloseClick;
-    this._handleFormSubmit = onFormSubmit;
+    this.#point = point;
+    this.#model = model;
+    this.#handleCloseClick = onCloseClick;
+    this.#handleFormSubmit = onFormSubmit;
 
     const rollupButton = this.element.querySelector('.event__rollup-btn');
 
     rollupButton.addEventListener('click', () => {
-      this._handleCloseClick();
+      this.#handleCloseClick();
     });
 
     this.element.addEventListener('submit', (evt) => {
-      this._handleFormSubmit(evt);
+      this.#handleFormSubmit(evt);
     });
   }
 
   get template() {
-    return createEditFormTemplate(this.point, this.model);
+    return createEditFormTemplate(this.#point, this.#model);
   }
 
 }
