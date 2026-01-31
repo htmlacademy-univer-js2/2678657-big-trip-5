@@ -12,15 +12,15 @@ export default class AppModel {
     this.#offers = OFFERS;
   }
 
-  get Points() {
+  get points() {
     return [...this.#points];
   }
 
-  get Destinations() {
+  get destinations() {
     return [...this.#destinations];
   }
 
-  get Offers() {
+  get offers() {
     return [...this.#offers];
   }
 

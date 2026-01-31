@@ -27,7 +27,7 @@ export default class Presenter {
     render(new FilterView(), this.#filtersContainer);
     render(new SortingView(), this.#container);
 
-    const points = this.#model.getPoints();
+    const points = this.#model.points;
 
     points.forEach((point) => {
       this.#renderPoint(point);
