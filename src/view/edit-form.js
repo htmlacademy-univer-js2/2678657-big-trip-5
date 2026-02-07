@@ -1,4 +1,4 @@
-import {formatDateTime} from '../mocks/point-mock.js';
+import { formatDateTime } from '../utils/functions.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createEditFormTemplate(point, model) {

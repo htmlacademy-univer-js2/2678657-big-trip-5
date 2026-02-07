@@ -1,4 +1,4 @@
-import {calculateDuration} from '../mocks/point-mock.js';
+import { calculateDuration } from '../utils/functions.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createRoutePointTemplate(point, model) {
@@ -59,16 +59,21 @@ export default class RoutePointView extends AbstractView {
   #point = null;
   #model = null;
   #handleRollupClick = null;
+  #handleFavoriteClick = null;
 
-  constructor(point, model, onRollupButtonClick) {
+  constructor(point, model, onRollupButtonClick, onFavoriteClick) {
     super();
     this.#point = point;
     this.#model = model;
     this.#handleRollupClick = onRollupButtonClick;
+    this.#handleFavoriteClick = onFavoriteClick;
 
-    const rollupButton = this.element.querySelector('.event__rollup-btn');
-    rollupButton.addEventListener('click', () => {
+
+    this.element.querySelector('.event__rollup-btn').addEventListener('click', () => {
       this.#handleRollupClick();
+    });
+    this.element.querySelector('.event__favorite-btn').addEventListener('click', () => {
+      this.#handleFavoriteClick();
     });
   }
 

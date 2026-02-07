@@ -1,10 +1,11 @@
-import { render, replace } from '../framework/render.js';
-import EditFormView from '../view/edit-form.js';
-import RoutePointView from '../view/route-point.js';
+import { render } from '../framework/render.js';
 import ListRoutePointView from '../view/list-route-point.js';
 import FilterView from '../view/filters.js';
 import SortingView from '../view/sorting.js';
 import TripInfoView from '../view/trip-info.js';
+import RoutePointPresenter from '../presenter/route-point-presenter.js';
+import { updateItem } from '../utils/items.js';
+
 
 export default class Presenter {
   #listRoutePointView = null;
@@ -12,6 +13,10 @@ export default class Presenter {
   #filtersContainer = null;
   #tripMainContainer = null;
   #model = null;
+
+  #pointPresenters = new Map();
+  #points = [];
+
 
   constructor({container, filtersContainer, tripMainContainer, model}) {
     this.#container = container;
@@ -23,48 +28,38 @@ export default class Presenter {
   init() {
     this.#listRoutePointView = new ListRoutePointView();
 
+    this.#points = [...this.#model.points];
+
     render(new TripInfoView(), this.#tripMainContainer, 'afterbegin');
     render(new FilterView(), this.#filtersContainer);
     render(new SortingView(), this.#container);
 
-    const points = this.#model.points;
-
-    points.forEach((point) => {
+    this.#points.forEach((point) => {
       this.#renderPoint(point);
     });
 
     render(this.#listRoutePointView, this.#container);
   }
 
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
+  };
+
   #renderPoint(pointData) {
-
-    const pointComponent = new RoutePointView(pointData, this.#model, replacePointToEdit);
-    const editFormComponent = new EditFormView(pointData, this.#model, replaceEditToPoint, onFormSubmit);
-
-    const escKeyDownHandler = (evt) => {
-      if (evt.key === 'Escape' || evt.key === 'Esc') {
-        evt.preventDefault();
-        replaceEditToPoint();
-        document.removeEventListener('keydown', escKeyDownHandler);
-      }
-    };
-
-    function replacePointToEdit() {
-      replace(editFormComponent, pointComponent);
-      document.addEventListener('keydown', escKeyDownHandler);
-    }
-
-    function replaceEditToPoint() {
-      replace(pointComponent, editFormComponent);
-      document.removeEventListener('keydown', escKeyDownHandler);
-    }
-
-    function onFormSubmit(evt) {
-      evt.preventDefault();
-      replaceEditToPoint();
-      document.removeEventListener('keydown', escKeyDownHandler);
-    }
-
-    render(pointComponent, this.#listRoutePointView.element);
+    const routePointPresenter = new RoutePointPresenter({
+      listRoutePointView: this.#listRoutePointView,
+      model: this.#model,
+      onDataChange: this.#handlePointChange,
+      onModeChange: this.#handleModeChange
+    });
+    routePointPresenter.init(pointData);
+    this.#pointPresenters.set(pointData.id, routePointPresenter);
   }
+
+  #handlePointChange = (updatedPoint) => {
+    this.#points = updateItem(this.#points, updatedPoint);
+    const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
+    pointPresenter.init(updatedPoint);
+  };
+
 }
