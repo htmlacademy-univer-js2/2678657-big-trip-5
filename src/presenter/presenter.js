@@ -17,7 +17,6 @@ export default class Presenter {
   #pointPresenters = new Map();
   #points = [];
 
-  #openedPointPresenter = null;
 
   constructor({container, filtersContainer, tripMainContainer, model}) {
     this.#container = container;
@@ -42,11 +41,8 @@ export default class Presenter {
     render(this.#listRoutePointView, this.#container);
   }
 
-  #handleModeChange = (presenter) => {
-    if (this.#openedPointPresenter && this.#openedPointPresenter !== presenter) {
-      this.#openedPointPresenter.resetView();
-    }
-    this.#openedPointPresenter = presenter;
+  #handleModeChange = () => {
+    this.#pointPresenters.forEach((presenter) => presenter.resetView());
   };
 
   #renderPoint(pointData) {
