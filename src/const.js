@@ -63,3 +63,9 @@ export const OFFERS = [
   { id: 'wine', type: 'restaurant', title: 'Add wine', price: 45 },
   { id: 'desert', type: 'restaurant', title: 'Add desert', price: 15 }
 ];
+
+export const SortType = {
+  DAY: 'day',
+  TIME: 'time',
+  PRICE: 'price',
+};

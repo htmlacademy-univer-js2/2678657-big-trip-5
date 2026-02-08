@@ -1,3 +1,5 @@
+import dayjs from 'dayjs';
+
 export function generateRandomDate() {
   const start = new Date();
   start.setDate(start.getDate() + Math.floor(Math.random() * 7));
@@ -35,4 +37,38 @@ export function calculateDuration(start, end) {
   } else {
     return `${diffMinutes}M`;
   }
+}
+
+
+export function getWeightForNullValue(valueA, valueB) {
+  if (valueA === null && valueB === null) {
+    return 0;
+  }
+
+  if (valueA === null) {
+    return 1;
+  }
+
+  if (valueB === null) {
+    return -1;
+  }
+
+  return null;
+}
+
+
+export function sortByDay(pointA, pointB) {
+  return dayjs(pointA.startDate).diff(dayjs(pointB.startDate));
+}
+
+export function sortByTime(pointA, pointB) {
+  const durationA = dayjs(pointA.endDate).diff(dayjs(pointA.startDate));
+  const durationB = dayjs(pointB.endDate).diff(dayjs(pointB.startDate));
+  return durationA - durationB;
+}
+
+export function sortByPrice(pointA, pointB) {
+  const priceA = pointA.price;
+  const priceB = pointB.price;
+  return priceA - priceB;
 }
