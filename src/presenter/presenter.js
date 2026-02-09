@@ -39,6 +39,8 @@ export default class Presenter {
 
     this.#points = [...this.#model.points];
 
+    this.#points.sort(sortByDay);
+
     this.#sourcedRoutePoints = [...this.#model.points];
 
     render(new TripInfoView(), this.#tripMainContainer, 'afterbegin');
@@ -119,8 +121,6 @@ export default class Presenter {
   }
 
   #renderListPoints() {
-    const containerElement = this.#listRoutePointView.element;
-    containerElement.innerHTML = '';
     this.#renderPoints(0, this.#points.length);
   }
 
