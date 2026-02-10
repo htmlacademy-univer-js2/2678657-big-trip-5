@@ -22,7 +22,6 @@ export default class Presenter {
   #sortComponent = null;
 
   #currentSortType = SortType.DAY;
-  #sourcedRoutePoints = [];
 
 
   constructor({container, filtersContainer, tripMainContainer, model}) {
@@ -40,8 +39,6 @@ export default class Presenter {
     this.#points = [...this.#model.points];
 
     this.#points.sort(sortByDay);
-
-    this.#sourcedRoutePoints = [...this.#model.points];
 
     render(new TripInfoView(), this.#tripMainContainer, 'afterbegin');
     render(new FilterView(), this.#filtersContainer);
@@ -72,7 +69,6 @@ export default class Presenter {
   #handlePointChange = (updatedPoint) => {
     this.#points = updateItem(this.#points, updatedPoint);
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
-    this.#sourcedRoutePoints = updateItem(this.#sourcedRoutePoints, updatedPoint);
     pointPresenter.init(updatedPoint);
   };
 
@@ -88,7 +84,7 @@ export default class Presenter {
         this.#points.sort(sortByPrice);
         break;
       default:
-        this.#points = [...this.#sourcedRoutePoints];
+        this.#points.sort(sortByDay);
     }
 
     this.#currentSortType = sortType;
@@ -122,13 +118,11 @@ export default class Presenter {
   }
 
   #renderListPoints() {
-    this.#renderPoints(0, this.#points.length);
+    this.#renderPoints();
   }
 
-  #renderPoints(from, to) {
-    this.#points
-      .slice(from, to)
-      .forEach((point) => this.#renderPoint(point));
+  #renderPoints() {
+    this.#points.forEach((point) => this.#renderPoint(point));
   }
 
 }

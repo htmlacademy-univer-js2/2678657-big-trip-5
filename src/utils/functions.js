@@ -40,23 +40,6 @@ export function calculateDuration(start, end) {
 }
 
 
-export function getWeightForNullValue(valueA, valueB) {
-  if (valueA === null && valueB === null) {
-    return 0;
-  }
-
-  if (valueA === null) {
-    return 1;
-  }
-
-  if (valueB === null) {
-    return -1;
-  }
-
-  return null;
-}
-
-
 export function sortByDay(pointA, pointB) {
   return dayjs(pointA.startDate).diff(dayjs(pointB.startDate));
 }
