@@ -1,10 +1,12 @@
-import { render } from '../framework/render.js';
+import { render, RenderPosition } from '../framework/render.js';
 import ListRoutePointView from '../view/list-route-point.js';
 import FilterView from '../view/filters.js';
 import SortingView from '../view/sorting.js';
 import TripInfoView from '../view/trip-info.js';
 import RoutePointPresenter from '../presenter/route-point-presenter.js';
 import { updateItem } from '../utils/items.js';
+import { sortByDay, sortByTime, sortByPrice } from '../utils/functions.js';
+import { SortType } from '../const.js';
 
 
 export default class Presenter {
@@ -17,6 +19,10 @@ export default class Presenter {
   #pointPresenters = new Map();
   #points = [];
 
+  #sortComponent = null;
+
+  #currentSortType = SortType.DAY;
+
 
   constructor({container, filtersContainer, tripMainContainer, model}) {
     this.#container = container;
@@ -28,17 +34,21 @@ export default class Presenter {
   init() {
     this.#listRoutePointView = new ListRoutePointView();
 
+    render(this.#listRoutePointView, this.#container);
+
     this.#points = [...this.#model.points];
+
+    this.#points.sort(sortByDay);
 
     render(new TripInfoView(), this.#tripMainContainer, 'afterbegin');
     render(new FilterView(), this.#filtersContainer);
-    render(new SortingView(), this.#container);
+    this.#renderSort();
+
 
     this.#points.forEach((point) => {
       this.#renderPoint(point);
     });
 
-    render(this.#listRoutePointView, this.#container);
   }
 
   #handleModeChange = () => {
@@ -61,5 +71,58 @@ export default class Presenter {
     const pointPresenter = this.#pointPresenters.get(updatedPoint.id);
     pointPresenter.init(updatedPoint);
   };
+
+  #sortRoutePoints(sortType) {
+    switch (sortType) {
+      case SortType.DAY:
+        this.#points.sort(sortByDay);
+        break;
+      case SortType.TIME:
+        this.#points.sort(sortByTime);
+        break;
+      case SortType.PRICE:
+        this.#points.sort(sortByPrice);
+        break;
+      default:
+        this.#points.sort(sortByDay);
+    }
+
+    this.#currentSortType = sortType;
+  }
+
+  #handleSortTypeChange = (sortType) => {
+
+    if (this.#currentSortType === sortType) {
+      return;
+    }
+
+    this.#sortRoutePoints(sortType);
+
+
+    this.#clearListPoints();
+    this.#renderListPoints();
+  };
+
+  #renderSort() {
+    this.#sortComponent = new SortingView({
+      currentSortType: this.#currentSortType,
+      onSortTypeChange: this.#handleSortTypeChange
+    });
+
+    render(this.#sortComponent, this.#container, RenderPosition.AFTERBEGIN);
+  }
+
+  #clearListPoints() {
+    this.#pointPresenters.forEach((presenter) => presenter.destroy());
+    this.#pointPresenters.clear();
+  }
+
+  #renderListPoints() {
+    this.#renderPoints();
+  }
+
+  #renderPoints() {
+    this.#points.forEach((point) => this.#renderPoint(point));
+  }
 
 }
