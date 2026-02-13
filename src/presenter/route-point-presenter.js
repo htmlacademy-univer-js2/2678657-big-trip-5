@@ -41,8 +41,8 @@ export default class RoutePointPresenter {
     this.#editFormComponent = new EditFormView(
       pointData,
       this.#model,
-      this.#handleFormSubmit,
-      this.#handleCloseClick
+      this.#handleCloseClick,
+      this.#handleFormSubmit
     );
 
     if (prevTaskComponent === null || prevTaskEditComponent === null) {
@@ -83,6 +83,7 @@ export default class RoutePointPresenter {
   #escKeyDownHandler = (evt) => {
     if (evt.key === 'Escape' || evt.key === 'Esc') {
       evt.preventDefault();
+      this.#editFormComponent.reset(this.#pointData);
       this.#replaceFormToCard();
     }
   };
@@ -95,7 +96,8 @@ export default class RoutePointPresenter {
     this.#replaceFormToCard();
   };
 
-  #handleFormSubmit = () => {
+  #handleFormSubmit = (point) => {
+    this.#handleDataChange(point);
     this.#replaceFormToCard();
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   };
@@ -107,6 +109,7 @@ export default class RoutePointPresenter {
 
   resetView() {
     if (this.#mode !== Mode.DEFAULT) {
+      this.#editFormComponent.reset(this.#pointData);
       this.#replaceFormToCard();
     }
   }
