@@ -15,7 +15,7 @@ function createEditFormTemplate(point, model) {
   }));
 
   const destinationOptionsTemplate = allDestinations
-    .map((dest) => `<option value="${dest.name}"></option>`).join('');
+    .map((dest) => `<option value="${dest.id}">${dest.name}</option>`).join('');
 
   const photosTemplate =
     `<div class="event__photos-container">
@@ -181,12 +181,9 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
-    const selectedDestination = this.#model.destinations.find((dest) => dest.name === evt.target.value);
-    if (selectedDestination) {
-      this.updateElement({
-        destinationId: selectedDestination.id,
-      });
-    }
+    this.updateElement({
+      destinationId: evt.target.value,
+    });
   };
 
   #priceChangeHandler = (evt) => {
@@ -228,8 +225,6 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   reset(point) {
-    this.updateElement(
-      EditFormView.parsePointToState(point),
-    );
+    this.updateElement(point);
   }
 }
