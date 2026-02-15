@@ -1,5 +1,7 @@
 import { formatDateTime } from '../utils/functions.js';
 import AbstractStatefulView from '../framework/view/abstract-stateful-view.js';
+import flatpickr from 'flatpickr';
+import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditFormTemplate(point, model) {
   const destination = model.getDestinationById(point.destinationId);
@@ -153,6 +155,9 @@ export default class EditFormView extends AbstractStatefulView {
   #handleCloseClick = null;
   #handleFormSubmit = null;
 
+  #datepickerStart = null;
+  #datepickerEnd = null;
+
   constructor(point, model, onCloseClick, onFormSubmit) {
     super();
     this._setState({ ...point });
@@ -169,6 +174,8 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input',this.#priceChangeHandler);
+
+    this.#setDatepickers();
   }
 
   #typeChangeHandler = (evt) => {
@@ -218,4 +225,54 @@ export default class EditFormView extends AbstractStatefulView {
   reset(point) {
     this.updateElement(point);
   }
+
+  removeElement() {
+    super.removeElement();
+
+    if (this.#datepickerStart) {
+      this.#datepickerStart.destroy();
+      this.#datepickerStart = null;
+    }
+    if (this.#datepickerEnd) {
+      this.#datepickerEnd.destroy();
+      this.#datepickerEnd = null;
+    }
+  }
+
+  #setDatepickers = () => {
+    this.#datepickerStart = flatpickr(
+      this.element.querySelector('#event-start-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.startDate,
+        onChange: this.#startDateChangeHandler,
+        'time_24hr': true,
+      },
+    );
+
+    this.#datepickerEnd = flatpickr(
+      this.element.querySelector('#event-end-time-1'),
+      {
+        dateFormat: 'd/m/y H:i',
+        enableTime: true,
+        defaultDate: this._state.endDate,
+        minDate: this._state.startDate,
+        onChange: this.#endDateChangeHandler,
+        'time_24hr': true,
+      },
+    );
+  };
+
+  #startDateChangeHandler = ([userDate]) => {
+    this.updateElement({
+      startDate: userDate,
+    });
+  };
+
+  #endDateChangeHandler = ([userDate]) => {
+    this.updateElement({
+      endDate: userDate,
+    });
+  };
 }
