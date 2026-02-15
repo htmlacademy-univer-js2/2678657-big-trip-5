@@ -155,7 +155,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   constructor(point, model, onCloseClick, onFormSubmit) {
     super();
-    this._setState(EditFormView.parsePointToState(point));
+    this._setState({ ...point });
     this.#model = model;
     this.#handleCloseClick = onCloseClick;
     this.#handleFormSubmit = onFormSubmit;
@@ -200,20 +200,11 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit(EditFormView.parseStateToPoint(this._state));
+    this.#handleFormSubmit({ ...this._state });
   };
 
   get template() {
     return createEditFormTemplate(this._state, this.#model);
-  }
-
-  static parsePointToState(point) {
-    return {...point};
-  }
-
-  static parseStateToPoint(state) {
-    const point = {...state};
-    return point;
   }
 
   #offerChangeHandler = (evt) => {
