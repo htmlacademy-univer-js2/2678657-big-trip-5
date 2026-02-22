@@ -55,3 +55,14 @@ export function sortByPrice(pointA, pointB) {
   const priceB = pointB.price;
   return priceB - priceA;
 }
+
+export const isDateFuture = (date) => date && new Date(date) > new Date();
+
+export const isDatePast = (date) => date && new Date(date) < new Date();
+
+export const isDatePresent = (startDate, endDate) => {
+  const now = new Date();
+  return startDate && endDate &&
+         new Date(startDate) <= now &&
+         new Date(endDate) >= now;
+};

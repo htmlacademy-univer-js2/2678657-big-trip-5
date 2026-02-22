@@ -17,7 +17,7 @@ function createEditFormTemplate(point, model) {
   }));
 
   const destinationOptionsTemplate = allDestinations
-    .map((dest) => `<option value="${dest.id}">${dest.name}</option>`).join('');
+    .map((dest) => `<option value="${dest.name}"></option>`).join('');
 
   const photosTemplate =
     `<div class="event__photos-container">
@@ -154,16 +154,19 @@ export default class EditFormView extends AbstractStatefulView {
   #model = null;
   #handleCloseClick = null;
   #handleFormSubmit = null;
+  #handleDeleteClick = null;
 
   #datepickerStart = null;
   #datepickerEnd = null;
 
-  constructor(point, model, onCloseClick, onFormSubmit) {
+  constructor(point, model, onCloseClick, onFormSubmit, onDeleteClick) {
     super();
     this._setState({ ...point });
     this.#model = model;
     this.#handleCloseClick = onCloseClick;
     this.#handleFormSubmit = onFormSubmit;
+    this.#handleDeleteClick = onDeleteClick;
+
     this._restoreHandlers();
   }
 
@@ -174,6 +177,7 @@ export default class EditFormView extends AbstractStatefulView {
     this.element.querySelector('.event__input--destination').addEventListener('change', this.#destinationChangeHandler);
     this.element.querySelector('.event__available-offers').addEventListener('change', this.#offerChangeHandler);
     this.element.querySelector('.event__input--price').addEventListener('input',this.#priceChangeHandler);
+    this.element.querySelector('.event__reset-btn').addEventListener('click',this.#formDeleteClickHandler);
 
     this.#setDatepickers();
   }
@@ -188,15 +192,30 @@ export default class EditFormView extends AbstractStatefulView {
 
   #destinationChangeHandler = (evt) => {
     evt.preventDefault();
+
+    const name = evt.target.value;
+    const allDestinations = this.#model.destinations;
+    const foundDestination = allDestinations.find((dest) => dest.name === name);
+
+    if (!foundDestination) {
+      evt.target.value = '';
+      return;
+    }
+
     this.updateElement({
-      destinationId: evt.target.value,
+      destinationId: foundDestination.id,
     });
   };
 
   #priceChangeHandler = (evt) => {
     evt.preventDefault();
-    this.updateElement({
-      price: evt.target.value,
+
+    const value = evt.target.value.replace(/\D/g, '');
+
+    evt.target.value = value;
+
+    this._setState({
+      price: value ? Number(value) : 0,
     });
   };
 
@@ -208,6 +227,11 @@ export default class EditFormView extends AbstractStatefulView {
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
     this.#handleFormSubmit({ ...this._state });
+  };
+
+  #formDeleteClickHandler = (evt) => {
+    evt.preventDefault();
+    this.#handleDeleteClick({ ...this._state });
   };
 
   get template() {
