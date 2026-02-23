@@ -191,14 +191,9 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #destinationChangeHandler = (evt) => {
-    evt.preventDefault();
-
-    const name = evt.target.value;
-    const allDestinations = this.#model.destinations;
-    const foundDestination = allDestinations.find((dest) => dest.name === name);
+    const foundDestination = this.#model.destinations.find((dest) => dest.name === evt.target.value);
 
     if (!foundDestination) {
-      evt.target.value = '';
       return;
     }
 
@@ -208,14 +203,10 @@ export default class EditFormView extends AbstractStatefulView {
   };
 
   #priceChangeHandler = (evt) => {
-    evt.preventDefault();
-
     const value = evt.target.value.replace(/\D/g, '');
 
-    evt.target.value = value;
-
     this._setState({
-      price: value ? Number(value) : 0,
+      price: Number(value),
     });
   };
 
@@ -231,7 +222,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formDeleteClickHandler = (evt) => {
     evt.preventDefault();
-    this.#handleDeleteClick({ ...this._state });
+    this.#handleDeleteClick(this._state);
   };
 
   get template() {

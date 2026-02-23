@@ -111,7 +111,7 @@ export default class RoutePointPresenter {
   #handleDeleteClick = (point) => {
     this.#handleDataChange(
       UserAction.DELETE_POINT,
-      UpdateType.MAJOR,
+      UpdateType.MINOR,
       point,
     );
     this.#replaceFormToCard();
