@@ -99,9 +99,14 @@ export default class RoutePointPresenter {
   };
 
   #handleFormSubmit = (point) => {
+    const isMinorUpdate =
+    this.#pointData.startDate !== point.startDate ||
+    this.#pointData.endDate !== point.endDate ||
+    this.#pointData.price !== point.price;
+
     this.#handleDataChange(
       UserAction.UPDATE_POINT,
-      UpdateType.MINOR,
+      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
       point,
     );
     this.#replaceFormToCard();
