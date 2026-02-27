@@ -2,10 +2,9 @@ import { calculateDuration } from '../utils/functions.js';
 import AbstractView from '../framework/view/abstract-view.js';
 
 function createRoutePointTemplate(point, model) {
-  const destination = model.getDestinationById(point.destinationId);
+  const destination = model.getDestinationById(point.destination);
   const allOffersForType = model.getOffersByType(point.type);
-  const offers = allOffersForType.filter((offer) => point.offerIds.includes(offer.id));
-
+  const offers = allOffersForType.filter((offer) => (point.offers || []).includes(offer.id));
   const { type, startDate, endDate, price, isFavorite } = point;
   const { name } = destination;
 

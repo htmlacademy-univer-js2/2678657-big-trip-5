@@ -1,6 +1,5 @@
 import {remove, render, RenderPosition} from '../framework/render.js';
 import EditFormView from '../view/edit-form.js';
-import {nanoid} from 'nanoid';
 import {UserAction, UpdateType} from '../const.js';
 
 export default class NewPointPresenter {
@@ -25,11 +24,11 @@ export default class NewPointPresenter {
 
     const blankPoint = {
       type: 'taxi',
-      destinationId: this.#model.destinations[0].id,
+      destination: this.#model.destinations[0].id,
       startDate: new Date(),
       endDate: new Date(),
       price: 0,
-      offerIds: [],
+      offers: [],
       isFavorite: false,
     };
 
@@ -63,7 +62,7 @@ export default class NewPointPresenter {
     this.#handleDataChange(
       UserAction.ADD_POINT,
       UpdateType.MAJOR,
-      {id: nanoid(), ...point},
+      point,
     );
     this.destroy();
   };

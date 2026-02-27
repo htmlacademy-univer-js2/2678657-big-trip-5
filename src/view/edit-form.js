@@ -4,11 +4,11 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditFormTemplate(point, model) {
-  const destination = model.getDestinationById(point.destinationId);
+  const destination = model.getDestinationById(point.destination);
   const allOffersForType = model.getOffersByType(point.type);
   const allDestinations = model.destinations;
 
-  const { type, startDate, endDate, price, offerIds: selectedOfferIds = [] } = point;
+  const { type, startDate, endDate, price, offers: selectedOfferIds = [] } = point;
   const { name, description, pictures } = destination;
 
   const offersWithSelection = allOffersForType.map((offer) => ({
@@ -22,7 +22,7 @@ function createEditFormTemplate(point, model) {
   const photosTemplate =
     `<div class="event__photos-container">
          <div class="event__photos-tape">
-           ${pictures.map((pic) => `<img class="event__photo" src="${pic}" alt="Event photo">`).join('')}
+           ${pictures.map((pic) => `<img class="event__photo" src="${pic.src}" alt="${pic.description}">`).join('')}
          </div>
        </div>`;
 
@@ -233,7 +233,7 @@ export default class EditFormView extends AbstractStatefulView {
     evt.preventDefault();
     const checkedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
     this.updateElement({
-      offerIds: checkedOffers.map((element) => element.value),
+      offers: checkedOffers.map((element) => element.value),
     });
   };
 

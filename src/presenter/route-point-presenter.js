@@ -29,8 +29,8 @@ export default class RoutePointPresenter {
   init(pointData) {
     this.#pointData = pointData;
 
-    const prevTaskComponent = this.#pointComponent;
-    const prevTaskEditComponent = this.#editFormComponent;
+    const prevPointComponent = this.#pointComponent;
+    const prevPointEditComponent = this.#editFormComponent;
 
     this.#pointComponent = new RoutePointView(
       pointData,
@@ -47,21 +47,21 @@ export default class RoutePointPresenter {
       this.#handleDeleteClick
     );
 
-    if (prevTaskComponent === null || prevTaskEditComponent === null) {
+    if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this.#pointComponent, this.#listRoutePointView.element);
       return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
-      replace(this.#pointComponent, prevTaskComponent);
+      replace(this.#pointComponent, prevPointComponent);
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editFormComponent, prevTaskEditComponent);
+      replace(this.#editFormComponent, prevPointEditComponent);
     }
 
-    remove(prevTaskComponent);
-    remove(prevTaskEditComponent);
+    remove(prevPointComponent);
+    remove(prevPointEditComponent);
   }
 
   destroy() {

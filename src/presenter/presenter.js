@@ -10,6 +10,8 @@ import { filter } from '../utils/filter.js';
 import NoPointsView from '../view/no-points-view.js';
 import NewPointPresenter from './new-point-presenter.js';
 import { FilterType } from '../const.js';
+import LoadingView from '../view/loading-view.js';
+import ErrorLoadDataView from '../view/error-data-view.js';
 
 
 export default class Presenter {
@@ -26,11 +28,14 @@ export default class Presenter {
 
   #sortComponent = null;
   #noPointsComponent = null;
+  #loadingComponent = new LoadingView();
+  #errorLoadDataComponent = new ErrorLoadDataView();
 
   #currentSortType = SortType.DAY;
 
   #onNewPointDestroy = null;
-
+  #isLoading = true;
+  #haveData = false;
 
   constructor({container, tripMainContainer, model, filterModel, onNewPointDestroy}) {
     this.#container = container;
@@ -65,13 +70,13 @@ export default class Presenter {
   #handleViewAction = (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#model.updateTask(updateType, update);
+        this.#model.updatePoint(updateType, update);
         break;
       case UserAction.ADD_POINT:
-        this.#model.addTask(updateType, update);
+        this.#model.addPoint(updateType, update);
         break;
       case UserAction.DELETE_POINT:
-        this.#model.deleteTask(updateType, update);
+        this.#model.deletePoint(updateType, update);
         break;
     }
   };
@@ -87,6 +92,17 @@ export default class Presenter {
         break;
       case UpdateType.MAJOR:
         this.#clearBoard({resetSortType: true});
+        this.#renderBoard();
+        break;
+      case UpdateType.INIT:
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
+        this.#renderBoard();
+        break;
+      case UpdateType.ERROR:
+        this.#haveData = true;
+        this.#isLoading = false;
+        remove(this.#loadingComponent);
         this.#renderBoard();
         break;
     }
@@ -139,6 +155,7 @@ export default class Presenter {
     remove(this.#listRoutePointView);
     remove(this.#tripMainComponent);
     remove(this.#sortComponent);
+    remove(this.#loadingComponent);
 
     if (this.#noPointsComponent) {
       remove(this.#noPointsComponent);
@@ -152,6 +169,17 @@ export default class Presenter {
   #renderBoard() {
     render(this.#listRoutePointView, this.#container);
     render(this.#tripMainComponent, this.#tripMainContainer, 'afterbegin');
+
+    if (this.#isLoading) {
+      this.#renderLoading();
+      return;
+    }
+
+    if (this.#haveData) {
+      this.#renderErrorData();
+      return;
+    }
+
     this.#renderSort();
 
     const points = this.points;
@@ -169,6 +197,14 @@ export default class Presenter {
 
   #renderPoints(points) {
     points.forEach((point) => this.#renderPoint(point));
+  }
+
+  #renderLoading() {
+    render(this.#loadingComponent, this.#listRoutePointView.element, RenderPosition.AFTERBEGIN);
+  }
+
+  #renderErrorData() {
+    render(this.#errorLoadDataComponent, this.#listRoutePointView.element, RenderPosition.AFTERBEGIN);
   }
 
   #getNewPointPresenter() {
