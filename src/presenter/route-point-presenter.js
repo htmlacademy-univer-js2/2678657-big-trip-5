@@ -29,8 +29,8 @@ export default class RoutePointPresenter {
   init(pointData) {
     this.#pointData = pointData;
 
-    const prevTaskComponent = this.#pointComponent;
-    const prevTaskEditComponent = this.#editFormComponent;
+    const prevPointComponent = this.#pointComponent;
+    const prevPointEditComponent = this.#editFormComponent;
 
     this.#pointComponent = new RoutePointView(
       pointData,
@@ -47,21 +47,21 @@ export default class RoutePointPresenter {
       this.#handleDeleteClick
     );
 
-    if (prevTaskComponent === null || prevTaskEditComponent === null) {
+    if (prevPointComponent === null || prevPointEditComponent === null) {
       render(this.#pointComponent, this.#listRoutePointView.element);
       return;
     }
 
     if (this.#mode === Mode.DEFAULT) {
-      replace(this.#pointComponent, prevTaskComponent);
+      replace(this.#pointComponent, prevPointComponent);
     }
 
     if (this.#mode === Mode.EDITING) {
-      replace(this.#editFormComponent, prevTaskEditComponent);
+      replace(this.#editFormComponent, prevPointEditComponent);
     }
 
-    remove(prevTaskComponent);
-    remove(prevTaskEditComponent);
+    remove(prevPointComponent);
+    remove(prevPointEditComponent);
   }
 
   destroy() {
@@ -98,36 +98,65 @@ export default class RoutePointPresenter {
     this.#replaceFormToCard();
   };
 
-  #handleFormSubmit = (point) => {
-    const isMinorUpdate =
-    this.#pointData.startDate !== point.startDate ||
-    this.#pointData.endDate !== point.endDate ||
-    this.#pointData.price !== point.price;
+  #handleFormSubmit = async (point) => {
+    this.#editFormComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+    try {
+      const isMinorUpdate =
+      this.#pointData.startDate !== point.startDate ||
+      this.#pointData.endDate !== point.endDate ||
+      this.#pointData.price !== point.price;
 
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
-      point,
-    );
-    this.#replaceFormToCard();
-    document.removeEventListener('keydown', this.#escKeyDownHandler);
+      await this.#handleDataChange(
+        UserAction.UPDATE_POINT,
+        isMinorUpdate ? UpdateType.MINOR : UpdateType.PATCH,
+        point,
+      );
+      await this.#replaceFormToCard();
+      document.removeEventListener('keydown', this.#escKeyDownHandler);
+    } catch (err) {
+      this.#editFormComponent.shake(() => {
+        this.#editFormComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+        });
+      });
+    }
   };
 
-  #handleDeleteClick = (point) => {
-    this.#handleDataChange(
-      UserAction.DELETE_POINT,
-      UpdateType.MINOR,
-      point,
-    );
-    this.#replaceFormToCard();
+  #handleDeleteClick = async (point) => {
+    this.#editFormComponent.updateElement({
+      isDisabled: true,
+      isDeleting: true,
+    });
+    try {
+      await this.#handleDataChange(
+        UserAction.DELETE_POINT,
+        UpdateType.MINOR,
+        point,
+      );
+    } catch (err) {
+      this.#editFormComponent.shake(() => {
+        this.#editFormComponent.updateElement({
+          isDisabled: false,
+          isDeleting: false,
+        });
+      });
+    }
   };
 
-  #handleFavoriteClick = () => {
-    this.#handleDataChange(
-      UserAction.UPDATE_POINT,
-      UpdateType.PATCH,
-      {...this.#pointData, isFavorite: !this.#pointData.isFavorite}
-    );
+  #handleFavoriteClick = async () => {
+    try {
+      await this.#handleDataChange(
+        UserAction.UPDATE_POINT,
+        UpdateType.PATCH,
+        {...this.#pointData, isFavorite: !this.#pointData.isFavorite}
+      );
+    }catch (err) {
+      this.#pointComponent.shake();
+    }
   };
 
   resetView() {

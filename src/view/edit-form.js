@@ -4,11 +4,11 @@ import flatpickr from 'flatpickr';
 import 'flatpickr/dist/flatpickr.min.css';
 
 function createEditFormTemplate(point, model) {
-  const destination = model.getDestinationById(point.destinationId);
+  const destination = model.getDestinationById(point.destination);
   const allOffersForType = model.getOffersByType(point.type);
   const allDestinations = model.destinations;
 
-  const { type, startDate, endDate, price, offerIds: selectedOfferIds = [] } = point;
+  const { type, startDate, endDate, price, offers: selectedOfferIds = [], isDisabled, isSaving, isDeleting } = point;
   const { name, description, pictures } = destination;
 
   const offersWithSelection = allOffersForType.map((offer) => ({
@@ -22,7 +22,7 @@ function createEditFormTemplate(point, model) {
   const photosTemplate =
     `<div class="event__photos-container">
          <div class="event__photos-tape">
-           ${pictures.map((pic) => `<img class="event__photo" src="${pic}" alt="Event photo">`).join('')}
+           ${pictures.map((pic) => `<img class="event__photo" src="${pic.src}" alt="${pic.description}">`).join('')}
          </div>
        </div>`;
 
@@ -33,10 +33,10 @@ function createEditFormTemplate(point, model) {
                       <span class="visually-hidden">Choose event type</span>
                       <img class="event__type-icon" width="17" height="17" src="img/icons/${type}.png" alt="Event type icon">
                     </label>
-                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox">
+                    <input class="event__type-toggle  visually-hidden" id="event-type-toggle-1" type="checkbox" ${isDisabled ? 'disabled' : ''}>
 
                     <div class="event__type-list">
-                      <fieldset class="event__type-group">
+                      <fieldset class="event__type-group" ${isDisabled ? 'disabled' : ''}>
                         <legend class="visually-hidden">Event type</legend>
 
                         <div class="event__type-item">
@@ -91,7 +91,7 @@ function createEditFormTemplate(point, model) {
                     <label class="event__label  event__type-output" for="event-destination-1">
                       ${type}
                     </label>
-                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name}" list="destination-list-1">
+                    <input class="event__input  event__input--destination" id="event-destination-1" type="text" name="event-destination" value="${name}" list="destination-list-1" ${isDisabled ? 'disabled' : ''}>
                     <datalist id="destination-list-1">
                       ${destinationOptionsTemplate}
                     </datalist>
@@ -99,10 +99,10 @@ function createEditFormTemplate(point, model) {
 
                   <div class="event__field-group  event__field-group--time">
                     <label class="visually-hidden" for="event-start-time-1">From</label>
-                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTime(startDate)}">
+                    <input class="event__input  event__input--time" id="event-start-time-1" type="text" name="event-start-time" value="${formatDateTime(startDate)}" ${isDisabled ? 'disabled' : ''}>
                     &mdash;
                     <label class="visually-hidden" for="event-end-time-1">To</label>
-                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTime(endDate)}">
+                    <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTime(endDate)}" ${isDisabled ? 'disabled' : ''}>
                   </div>
 
                   <div class="event__field-group  event__field-group--price">
@@ -110,12 +110,12 @@ function createEditFormTemplate(point, model) {
                       <span class="visually-hidden">Price</span>
                       &euro;
                     </label>
-                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}">
+                    <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" ${isDisabled ? 'disabled' : ''}>
                   </div>
 
-                  <button class="event__save-btn  btn  btn--blue" type="submit">Save</button>
-                  <button class="event__reset-btn" type="reset">Delete</button>
-                  <button class="event__rollup-btn" type="button">
+                  <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
+                  <button class="event__reset-btn" type="reset" ${isDisabled ? 'disabled' : ''}>${isDeleting ? 'Deleting...' : 'Delete'}</button>
+                  <button class="event__rollup-btn" type="button" ${isDisabled ? 'disabled' : ''}>
                     <span class="visually-hidden">Open event</span>
                   </button>
                 </header>
@@ -130,7 +130,7 @@ function createEditFormTemplate(point, model) {
                                    type="checkbox" 
                                    name="event-offer" 
                                    value="${offer.id}"
-                                   ${offer.selected ? 'checked' : ''}>
+                                   ${offer.selected ? 'checked' : ''} ${isDisabled ? 'disabled' : ''}>
                             <label class="event__offer-label" for="event-offer-${offer.id}">
                               <span class="event__offer-title">${offer.title}</span>
                               &plus;&euro;&nbsp;
@@ -161,7 +161,7 @@ export default class EditFormView extends AbstractStatefulView {
 
   constructor(point, model, onCloseClick, onFormSubmit, onDeleteClick) {
     super();
-    this._setState({ ...point });
+    this._setState(EditFormView.parsePointToState(point));
     this.#model = model;
     this.#handleCloseClick = onCloseClick;
     this.#handleFormSubmit = onFormSubmit;
@@ -217,7 +217,8 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
-    this.#handleFormSubmit({ ...this._state });
+    const point = EditFormView.parseStateToPoint(this._state);
+    this.#handleFormSubmit(point);
   };
 
   #formDeleteClickHandler = (evt) => {
@@ -233,12 +234,12 @@ export default class EditFormView extends AbstractStatefulView {
     evt.preventDefault();
     const checkedOffers = Array.from(this.element.querySelectorAll('.event__offer-checkbox:checked'));
     this.updateElement({
-      offerIds: checkedOffers.map((element) => element.value),
+      offers: checkedOffers.map((element) => element.value),
     });
   };
 
   reset(point) {
-    this.updateElement(point);
+    this.updateElement(EditFormView.parsePointToState(point));
   }
 
   removeElement() {
@@ -290,4 +291,23 @@ export default class EditFormView extends AbstractStatefulView {
       endDate: userDate,
     });
   };
+
+  static parsePointToState(point) {
+    return {
+      ...point,
+      isDisabled: false,
+      isSaving: false,
+      isDeleting: false,
+    };
+  }
+
+  static parseStateToPoint(state) {
+    const point = {...state};
+
+    delete point.isDisabled;
+    delete point.isSaving;
+    delete point.isDeleting;
+
+    return point;
+  }
 }
