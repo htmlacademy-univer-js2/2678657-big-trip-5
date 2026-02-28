@@ -67,16 +67,16 @@ export default class Presenter {
     }
   }
 
-  #handleViewAction = (actionType, updateType, update) => {
+  #handleViewAction = async (actionType, updateType, update) => {
     switch (actionType) {
       case UserAction.UPDATE_POINT:
-        this.#model.updatePoint(updateType, update);
+        await this.#model.updatePoint(updateType, update);
         break;
       case UserAction.ADD_POINT:
-        this.#model.addPoint(updateType, update);
+        await this.#model.addPoint(updateType, update);
         break;
       case UserAction.DELETE_POINT:
-        this.#model.deletePoint(updateType, update);
+        await this.#model.deletePoint(updateType, update);
         break;
     }
   };
