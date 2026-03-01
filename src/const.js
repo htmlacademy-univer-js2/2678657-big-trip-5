@@ -107,3 +107,8 @@ export const Method = {
 
 export const AUTHORIZATION = 'Basic hS2s232323232323fS44wcl1sa2j';
 export const END_POINT = 'https://24.objects.htmlacademy.pro/big-trip';
+
+export const TimeLimit = {
+  LOWER_LIMIT: 350,
+  UPPER_LIMIT: 1000,
+};

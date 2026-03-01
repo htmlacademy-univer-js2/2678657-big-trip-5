@@ -58,13 +58,26 @@ export default class NewPointPresenter {
     document.removeEventListener('keydown', this.#escKeyDownHandler);
   }
 
-  #handleFormSubmit = (point) => {
-    this.#handleDataChange(
-      UserAction.ADD_POINT,
-      UpdateType.MAJOR,
-      point,
-    );
-    this.destroy();
+  #handleFormSubmit = async (point) => {
+    this.#pointEditComponent.updateElement({
+      isDisabled: true,
+      isSaving: true,
+    });
+    try {
+      await this.#handleDataChange(
+        UserAction.ADD_POINT,
+        UpdateType.MAJOR,
+        point,
+      );
+      this.destroy();
+    } catch (err) {
+      this.#pointEditComponent.shake(() => {
+        this.#pointEditComponent.updateElement({
+          isDisabled: false,
+          isSaving: false,
+        });
+      });
+    }
   };
 
   #handleDeleteClick = () => {
