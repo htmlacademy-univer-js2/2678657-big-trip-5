@@ -12,6 +12,8 @@ import NewPointPresenter from './new-point-presenter.js';
 import { FilterType } from '../const.js';
 import LoadingView from '../view/loading-view.js';
 import ErrorLoadDataView from '../view/error-data-view.js';
+import UiBlocker from '../framework/ui-blocker/ui-blocker.js';
+import {TimeLimit} from '../const.js';
 
 
 export default class Presenter {
@@ -36,6 +38,11 @@ export default class Presenter {
   #onNewPointDestroy = null;
   #isLoading = true;
   #haveData = false;
+
+  #uiBlocker = new UiBlocker({
+    lowerLimit: TimeLimit.LOWER_LIMIT,
+    upperLimit: TimeLimit.UPPER_LIMIT
+  });
 
   constructor({container, tripMainContainer, model, filterModel, onNewPointDestroy}) {
     this.#container = container;
@@ -68,16 +75,22 @@ export default class Presenter {
   }
 
   #handleViewAction = async (actionType, updateType, update) => {
-    switch (actionType) {
-      case UserAction.UPDATE_POINT:
-        await this.#model.updatePoint(updateType, update);
-        break;
-      case UserAction.ADD_POINT:
-        await this.#model.addPoint(updateType, update);
-        break;
-      case UserAction.DELETE_POINT:
-        await this.#model.deletePoint(updateType, update);
-        break;
+    this.#uiBlocker.block();
+
+    try {
+      switch (actionType) {
+        case UserAction.UPDATE_POINT:
+          await this.#model.updatePoint(updateType, update);
+          break;
+        case UserAction.ADD_POINT:
+          await this.#model.addPoint(updateType, update);
+          break;
+        case UserAction.DELETE_POINT:
+          await this.#model.deletePoint(updateType, update);
+          break;
+      }
+    } finally {
+      this.#uiBlocker.unblock();
     }
   };
 

@@ -66,6 +66,7 @@ export default class PointApiService extends ApiService {
     delete adaptedPoint.isFavorite;
     delete adaptedPoint.price;
     delete adaptedPoint.offerIds;
+    delete adaptedPoint.isValidationFailed;
 
     return adaptedPoint;
   }

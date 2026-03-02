@@ -8,7 +8,7 @@ function createEditFormTemplate(point, model) {
   const allOffersForType = model.getOffersByType(point.type);
   const allDestinations = model.destinations;
 
-  const { type, startDate, endDate, price, offers: selectedOfferIds = [], isDisabled, isSaving, isDeleting } = point;
+  const { type, startDate, endDate, price, offers: selectedOfferIds = [], isDisabled, isSaving, isDeleting, isValidationFailed} = point;
   const { name, description, pictures } = destination;
 
   const offersWithSelection = allOffersForType.map((offer) => ({
@@ -103,6 +103,7 @@ function createEditFormTemplate(point, model) {
                     &mdash;
                     <label class="visually-hidden" for="event-end-time-1">To</label>
                     <input class="event__input  event__input--time" id="event-end-time-1" type="text" name="event-end-time" value="${formatDateTime(endDate)}" ${isDisabled ? 'disabled' : ''}>
+                    ${isValidationFailed && startDate >= endDate ? '<p style="color: red; font-size: 10px; position: absolute; margin-top: 60px;">Дата начала должна быть раньше конца</p>' : ''}
                   </div>
 
                   <div class="event__field-group  event__field-group--price">
@@ -111,6 +112,7 @@ function createEditFormTemplate(point, model) {
                       &euro;
                     </label>
                     <input class="event__input  event__input--price" id="event-price-1" type="text" name="event-price" value="${price}" ${isDisabled ? 'disabled' : ''}>
+                    ${isValidationFailed && price <= 0 ? '<p style="color: red; font-size: 10px; position: absolute; margin-top: 60px;">Цена должна быть больше 0</p>' : ''}
                   </div>
 
                   <button class="event__save-btn  btn  btn--blue" type="submit" ${isDisabled ? 'disabled' : ''}>${isSaving ? 'Saving...' : 'Save'}</button>
@@ -205,6 +207,12 @@ export default class EditFormView extends AbstractStatefulView {
   #priceChangeHandler = (evt) => {
     const value = evt.target.value.replace(/\D/g, '');
 
+    if (evt.target.value !== value) {
+      this.updateElement({
+        price: Number(value),
+      });
+      return;
+    }
     this._setState({
       price: Number(value),
     });
@@ -217,6 +225,14 @@ export default class EditFormView extends AbstractStatefulView {
 
   #formSubmitHandler = (evt) => {
     evt.preventDefault();
+    if (this._state.price <= 0 || this._state.startDate >= this._state.endDate) {
+      this.updateElement({
+        isValidationFailed: true,
+      });
+      this.shake();
+      return;
+    }
+    this._setState({ isValidationFailed: false });
     const point = EditFormView.parseStateToPoint(this._state);
     this.#handleFormSubmit(point);
   };
@@ -298,6 +314,7 @@ export default class EditFormView extends AbstractStatefulView {
       isDisabled: false,
       isSaving: false,
       isDeleting: false,
+      isValidationFailed: false,
     };
   }
 
@@ -310,4 +327,5 @@ export default class EditFormView extends AbstractStatefulView {
 
     return point;
   }
+
 }

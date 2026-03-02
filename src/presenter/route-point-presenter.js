@@ -95,6 +95,7 @@ export default class RoutePointPresenter {
   };
 
   #handleCloseClick = () => {
+    this.#editFormComponent.reset(this.#pointData);
     this.#replaceFormToCard();
   };
 
@@ -166,4 +167,3 @@ export default class RoutePointPresenter {
     }
   }
 }
-
